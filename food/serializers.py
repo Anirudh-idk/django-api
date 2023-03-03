@@ -67,8 +67,8 @@ class Cart_serializer(serializers.ModelSerializer):
         ]
 
 class Cartitem_serializer(serializers.ModelSerializer):
-    dish = serializers.RelatedField(read_only=True)
-    cart = serializers.RelatedField(read_only=True)
+    dish = serializers.ReadOnlyField(read_only=True)
+    cart = serializers.ReadOnlyField(read_only=True)
     class Meta:
         model = models.Cartitem
         fields = [
@@ -79,5 +79,25 @@ class Cartitem_serializer(serializers.ModelSerializer):
         ]
     def save(self,data):
         instance = models.Cartitem.objects.create(cart = data['cart'],dish = data['dish'],quantity = data['quantity'])
-        print(data)
+        return instance
+    
+class Order_serializer(serializers.ModelSerializer):
+    dish = serializers.ReadOnlyField(read_only=True)
+    customer = serializers.ReadOnlyField(read_only=True)
+    quantity = serializers.ReadOnlyField(read_only=True)
+    restaurant_name = serializers.ReadOnlyField(read_only=True)
+   
+    class Meta:
+        model = models.Orders
+        fields = [
+            'id',
+            'dish',
+            'customer',
+            'quantity',
+            'restaurant_name',
+            'status'
+        ]
+
+    def save(self,data):
+        instance = models.Orders.objects.create(dish = data['dish'],customer = data['customer'],quantity = data['quantity'],restaurant_name = data['restaurant_name'])
         return instance

@@ -75,12 +75,23 @@ class Cart(models.Model):
     email = models.EmailField(max_length=100,unique = True)
 
 
+
+
 class Cartitem(models.Model):
     dish = models.ForeignKey(to = Dishes,on_delete=models.CASCADE,null=True,blank=True)
     cart = models.ForeignKey(to = Cart,on_delete=models.CASCADE,null=True,blank=True) 
     quantity = models.IntegerField()
-
-
+'''
+class orderitem(models.Model):
+    pass
+'''
+class Orders(models.Model):
+    dish = models.ForeignKey(to=Dishes,on_delete=models.CASCADE)
+    customer = models.ForeignKey(to=user,on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    restaurant_name = models.ForeignKey(to=restaurant,on_delete=models.CASCADE)
+    status = models.CharField(max_length = 40,choices=[('A','Accepted'),('R','Rejected'),('F','Finished'),('D','Delivered')],default='None')
+    
 
 
 

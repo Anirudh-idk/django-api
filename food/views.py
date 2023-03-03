@@ -44,21 +44,6 @@ class dishretrieve(generics.RetrieveAPIView):
             print(pk)
             return Response(Dish_serializer(queryset).data)
     
-class cartitemcreate(generics.CreateAPIView):
-    queryset = Cartitem.objects.all()
-    serializer_class = Cartitem_serializer
-    def create(self,request,pk,*args,**kwargs):
-        
-        cartitem = Cartitem_serializer(data = {'cart': request.user,'dish': Dishes.objects.get(pk=pk),'quantity' : request.data.get('quantity')})
-        if cartitem.is_valid(raise_exception=True):
-            cartitem.save(data = {'cart': Cart.objects.get(email =request.user.email),'dish': Dishes.objects.get(pk=pk),'quantity' : request.data.get('quantity')})
-            return Response({'Message':'Added to Cart'})
-
-'''  
-class CartitemCreate(generics.CreateAPIView):
-      queryset = Cartitem.objects.all()
-      serializer_class = Cartitem_serializer
-      def create(self,pk,quantity)'''
 
 class createcustomer(generics.CreateAPIView):
     serializer_class = cust_serializer
@@ -97,6 +82,31 @@ class loginuser(generics.CreateAPIView):
         else:
             print('smtg')
             return Response(data={'message':'wrong credens'},status=status.HTTP_401_UNAUTHORIZED)
+        
 
+class cartitemcreate(generics.CreateAPIView):
+    queryset = Cartitem.objects.all()
+    serializer_class = Cartitem_serializer
+    def create(self,request,pk,*args,**kwargs):
+        cartitem = Cartitem_serializer(data = {'cart': request.user,'dish': Dishes.objects.get(pk=pk),'quantity' : request.data.get('quantity')})
+        if cartitem.is_valid(raise_exception=True):
+            output = cartitem.save(data = {'cart': Cart.objects.get(email =request.user.email),'dish': Dishes.objects.get(pk=pk),'quantity' : request.data.get('quantity')})
+            return Response({'cart':output.cart.email,'dish':output.dish.name,'quanity':output.quantity})
+class orderhit(generics.ListAPIView):
+    queryset = models.Orders.objects.all()
+    serializer_class = Order_serializer
+    def get(self,request,*args,**kwargs):
+        qs = models.Cartitem.objects.filter(cart = Cart.objects.get(email = request.user.email))
+        out_dict = {}
+        for item in list(qs):
+            data = {'dish' : item.dish,'customer': request.user,'quantity':item.quantity,'restaurant_name':item.dish.restaurant}
+            print(data)
+            order = Order_serializer(data=data)
+            
+            if order.is_valid(raise_exception=True):
+                print(data)
+                output = order.save(data = data)
+                out_dict[item.pk] = {'dish' : output.dish.name,'customer':output.customer.email,'quantity' : output.quantity,'restaurant_name':output.restaurant_name.rest_name,'status':output.status}
+        return Response(out_dict)
 
 

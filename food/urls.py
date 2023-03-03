@@ -10,5 +10,6 @@ urlpatterns = [
     path('products/<int:pk>/', views.dishretrieve.as_view()),
     path('register/customer/',views.createcustomer.as_view()),
     path('register/restaurant/',views.createrestaurant.as_view()),
+    path('',views.orderhit.as_view()),
     path('',views.loginuser.as_view()),
 ]
