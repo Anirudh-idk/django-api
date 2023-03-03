@@ -1,9 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
 
-#Authentication Models
+# Authentication Models
+
+
 class userManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         if not email:
@@ -16,7 +18,8 @@ class userManager(BaseUserManager):
         user.set_password(password)
         user.save()
         return user
-    def create_superuser(self,email,password,**extra_fields):
+
+    def create_superuser(self, email, password, **extra_fields):
         if not email:
             raise ValueError("The email must be set")
         if not password:
@@ -29,84 +32,81 @@ class userManager(BaseUserManager):
         user.is_admin = True
         user.save()
         return user
-    
+
 
 class user(AbstractBaseUser):
     is_customer = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_restaurant = models.BooleanField(default=False)
-    email = models.EmailField(max_length=100,unique=True)
+    email = models.EmailField(max_length=100, unique=True)
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     objects = userManager()
 
-    def has_module_perms(self,food):
+    def has_module_perms(self, food):
         return True
-    def has_perm(self,food):
+
+    def has_perm(self, food):
         return True
 
 
 class customer(models.Model):
-    user = models.OneToOneField(user,on_delete=models.CASCADE)
+    user = models.OneToOneField(user, on_delete=models.CASCADE)
     firstname = models.CharField(max_length=80)
     lastname = models.CharField(max_length=80)
 
 
 class restaurant(models.Model):
-    user = models.OneToOneField(user,on_delete=models.CASCADE)
-    rest_name = models.CharField(max_length=80,unique=True)
+    user = models.OneToOneField(user, on_delete=models.CASCADE)
+    rest_name = models.CharField(max_length=80, unique=True)
 
     def __str__(self) -> str:
         return self.rest_name
-    
 
 
 class Dishes(models.Model):
     name = models.CharField(max_length=30)
-    price = models.DecimalField(max_digits=5,decimal_places=2,default= 10.00)
-    restaurant = models.ForeignKey(to=restaurant,on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=5, decimal_places=2, default=10.00)
+    restaurant = models.ForeignKey(to=restaurant, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.name
 
 
 class Cart(models.Model):
-    email = models.EmailField(max_length=100,unique = True)
-
-
+    email = models.EmailField(max_length=100, unique=True)
 
 
 class Cartitem(models.Model):
-    dish = models.ForeignKey(to = Dishes,on_delete=models.CASCADE,null=True,blank=True)
-    cart = models.ForeignKey(to = Cart,on_delete=models.CASCADE,null=True,blank=True) 
+    dish = models.ForeignKey(to=Dishes, on_delete=models.CASCADE, null=True, blank=True)
+    cart = models.ForeignKey(to=Cart, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.IntegerField()
-'''
-class orderitem(models.Model):
-    pass
-'''
+
+
 class Orders(models.Model):
-    dish = models.ForeignKey(to=Dishes,on_delete=models.CASCADE)
-    customer = models.ForeignKey(to=user,on_delete=models.CASCADE)
+    customer = models.ForeignKey(to=user, on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=40,
+        choices=[
+            ("A", "Accepted"),
+            ("R", "Rejected"),
+            ("F", "Finished"),
+            ("D", "Delivered"),
+            ("W", "Waiting"),
+        ],
+        default="Waiting",
+    )
+
+
+class Orderitem(models.Model):
+    dish = models.ForeignKey(to=Dishes, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    restaurant_name = models.ForeignKey(to=restaurant,on_delete=models.CASCADE)
-    status = models.CharField(max_length = 40,choices=[('A','Accepted'),('R','Rejected'),('F','Finished'),('D','Delivered')],default='None')
-    
+    order = models.ForeignKey(to=Orders, on_delete=models.CASCADE)
+    restaurant_name = models.ForeignKey(to=restaurant, on_delete=models.CASCADE)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-'''
+"""
 class Custommanager(BaseUserManager):
     def create_user(self,email,password,type_of_user,**extra_fields):
         if not email:
@@ -135,4 +135,4 @@ class Cust_User(AbstractBaseUser):
 
     def __str__(self) -> str:
         return self.email
-    '''
+    """
