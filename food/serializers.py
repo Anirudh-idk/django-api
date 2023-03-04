@@ -86,7 +86,6 @@ class Orderitem_serializer(serializers.ModelSerializer):
     dish = serializers.ReadOnlyField(read_only=True)
     quantity = serializers.ReadOnlyField(read_only=True)
     order = serializers.ReadOnlyField(read_only=True)
-    restaurant_name = serializers.ReadOnlyField(read_only=True)
 
     class Meta:
         model = models.Orders
@@ -95,15 +94,13 @@ class Orderitem_serializer(serializers.ModelSerializer):
             "dish",
             "quantity",
             "order",
-            "restaurant_name",
         ]
 
-    def save(self, data):  # custom save function to tackle with read_only field issu
+    def save(self, data):  # custom save function to tackle with read_only field issue
         instance = models.Orderitem.objects.create(
             dish=data["dish"],
             order=data["order"],
             quantity=data["quantity"],
-            restaurant_name=data["restaurant_name"],
         )
 
         return instance
@@ -111,11 +108,15 @@ class Orderitem_serializer(serializers.ModelSerializer):
 
 class Order_serializer(serializers.ModelSerializer):
     customer = serializers.ReadOnlyField(read_only=True)
+    restaurant = serializers.ReadOnlyField(read_only=True)
 
     class Meta:
         model = models.Orders
-        fields = ["id", "customer", "status"]
+        fields = ["id", "customer", "restaurant", "created_at", "status"]
 
     def save(self, data):  # custom save function to tackle with read_only field issue
-        instance = models.Orders.objects.create(customer=data["customer"])
+        instance = models.Orders.objects.create(
+            customer=data["customer"],
+            restaurant=data["restaurant"],
+        )
         return instance

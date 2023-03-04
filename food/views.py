@@ -4,7 +4,7 @@ from .serializers import *
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 
 # Create your views here.
 
@@ -133,52 +133,74 @@ class make_order(generics.ListAPIView):
     serializer_class = Orderitem_serializer
 
     def get(self, request, *args, **kwargs):
-        qs = models.Cartitem.objects.filter(
-            cart=Cart.objects.get(email=request.user.email)
-        )
-        if qs:
-            order = Order_serializer(
-                data={"customer": request.user}
-            )  # making a new order entry for all the items in the given cart
+        out_dict = {}  # dictionary to output - no use just to show some output
+        for restauarnt in models.restaurant.objects.distinct():
 
-            if order.is_valid(raise_exception=True):
-                ordersmtg = order.save(data={"customer": request.user})
-            out_dict = {}  # dictionary to output - no use just to give some output
-
-            for item in list(qs):
-                data = {
-                    "dish": item.dish,
-                    "quantity": item.quantity,
-                    "order": ordersmtg,
-                    "restaurant_name": item.dish.restaurant,
-                }
-
-                Orderitem = Orderitem_serializer(data=data)
-
-                if Orderitem.is_valid(raise_exception=True):
-                    output = Orderitem.save(data=data)
-                    out_dict[item.pk] = {
-                        "dish": output.dish.name,
-                        "quantity": output.quantity,
-                        "order": ordersmtg.id,
-                        "restaurant_name": output.restaurant_name.rest_name,
-                    }
-
-            qs.delete()
-            return Response(
-                {ordersmtg.customer.email: out_dict, "status": ordersmtg.status}
+            qs_cartitem = models.Cartitem.objects.filter(
+                cart=Cart.objects.get(email=request.user.email),
+                dish__restaurant=restauarnt.id,
             )
 
-        else:
-            return Response(data={"message": "empty cart"})
+            if qs_cartitem:
+                data_order = {"customer": request.user, "restaurant": restauarnt}
+                order = Order_serializer(
+                    data=data_order
+                )  # making a new order entry for all the items in the given cart
+
+                if order.is_valid(raise_exception=True):
+                    order = order.save(data=data_order)
+
+                orderitem_dict = {}
+
+                for i in range(len(list(qs_cartitem))):
+                    item = list(qs_cartitem)[i]
+                    data = {
+                        "dish": item.dish,
+                        "quantity": item.quantity,
+                        "order": order,
+                    }
+
+                    Orderitem = Orderitem_serializer(data=data)
+
+                    if Orderitem.is_valid(raise_exception=True):
+                        output = Orderitem.save(data=data)
+                        orderitem_dict[f"Item{i+1}"] = {
+                            "dish": output.dish.name,
+                            "quantity": output.quantity,
+                        }
+
+                qs_cartitem.delete()
+                out_dict[restauarnt.rest_name] = orderitem_dict
+
+            else:
+                return Response(data={"message": "empty cart"})
+        return Response(out_dict)
 
 
-"""
 class RestaurantSpecificOrders(generics.ListAPIView):
     queryset = models.Orders.objects.all()
     serializer_class = Orderitem_serializer
-    def get(self,request,*args,**kwargs):
-        rest_name = list(models.restaurant.objects.filter(user = request.user))[0]
-        qs = models.Orders.objects.filter(restaurant_name = rest_name).values()
-        return Response(Orderitem_serializer(qs,many = True).data)
-        """
+
+    def get(self, request, *args, **kwargs):
+        out_dict1 = {}
+        out_dict2 = {}
+        restname = models.restaurant.objects.get(user=request.user)
+        for x in models.Orders.objects.filter(restaurant=restname):
+            qs_orderitems = models.Orderitem.objects.filter(order=x)
+
+            orderitem_dict = {}
+
+            for y in range(len(list(qs_orderitems))):
+                item = list(qs_orderitems)[y]
+                orderitem_dict[f"Item{y+1}"] = {
+                    "dish": item.dish.name,
+                    "quantity": item.quantity,
+                }
+
+            out_dict2["Order_id"] = x.pk
+            out_dict2["customer"] = x.customer.email
+            out_dict2["status"] = x.status
+            out_dict2["Order"] = orderitem_dict
+
+            out_dict1[x.pk] = out_dict2
+        return Response(out_dict1)

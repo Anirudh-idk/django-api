@@ -11,6 +11,6 @@ urlpatterns = [
     path("register/customer/", views.createcustomer.as_view()),
     path("register/restaurant/", views.createrestaurant.as_view()),
     path("", views.make_order.as_view()),
-    path("", views.loginuser.as_view()),
-    # path('restaurant/',views.RestaurantSpecificOrders.as_view())
+    path("lu/", views.loginuser.as_view()),
+    path("restaurant/", views.RestaurantSpecificOrders.as_view()),
 ]

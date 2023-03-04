@@ -86,6 +86,8 @@ class Cartitem(models.Model):
 
 class Orders(models.Model):
     customer = models.ForeignKey(to=user, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(to=restaurant, on_delete=models.CASCADE)
+    created_at = models.DateField(auto_now_add=True)
     status = models.CharField(
         max_length=40,
         choices=[
@@ -103,7 +105,6 @@ class Orderitem(models.Model):
     dish = models.ForeignKey(to=Dishes, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     order = models.ForeignKey(to=Orders, on_delete=models.CASCADE)
-    restaurant_name = models.ForeignKey(to=restaurant, on_delete=models.CASCADE)
 
 
 """
