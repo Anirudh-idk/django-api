@@ -1,0 +1,6 @@
+-- fix urls and naming schemes
+-- add the restauarnt list page
+-- remove dish update and delete
+-- work task 3 (accepted then Finished/Delivered)
+-- try to make ordering system more efficient
+-- try to make restauarnt and dishes hyperlink for increasing extra_fields

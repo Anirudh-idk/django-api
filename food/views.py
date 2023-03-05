@@ -62,6 +62,31 @@ class createrestaurant(generics.ListCreateAPIView):
             return Response(rest.data)
 
 
+class RestaurantListView(generics.ListAPIView):
+    queryset = restaurant.objects.distinct()
+    serializer_class = rest_serializer
+
+    def get(self, *args, **kwargs):
+        queryset = list(restaurant.objects.distinct().values_list("rest_name"))
+        out_dict = {}
+        for i in range(len(queryset)):
+            out_dict[f"Restaurant{i}"] = queryset[i][0]
+        return Response(out_dict)
+
+
+class Dish_RestaurantSpecificlistView(generics.ListAPIView):
+    queryset = Dishes.objects.all()
+    serializer_class = Dish_serializer
+    lookup_field = "rest_name"
+
+    def get(self, request, rest_name, *args, **kwargs):
+        qs = Dishes.objects.filter(
+            restaurant=restaurant.objects.get(rest_name=rest_name).pk
+        )
+        serializer = Dish_serializer(qs, many=True)
+        return Response(serializer.data)
+
+
 # Dishes CRUD views(made while learning, might remove update and delete ones later)
 class DishListCreateview(generics.ListCreateAPIView):
     queryset = Dishes.objects.all()
