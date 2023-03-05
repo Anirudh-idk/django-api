@@ -204,3 +204,34 @@ class RestaurantSpecificOrders(generics.ListAPIView):
 
             out_dict1[x.pk] = out_dict2
         return Response(out_dict1)
+
+
+class updateStatus(generics.RetrieveUpdateAPIView):
+    queryset = Orders.objects.all()
+    serializer_class = Order_serializer
+
+    def get(self, request, pk, *args, **kwargs):
+        Order = models.Orders.objects.get(pk=pk)
+        qs_orderitems = models.Orderitem.objects.filter(order=Order)
+
+        out_dict = {}
+        Orderitem_dict = {}
+
+        for i in range(len(list(qs_orderitems))):
+            item = list(qs_orderitems)[i]
+            Orderitem_dict[f"Item{i+1}"] = {
+                "dish": item.dish.name,
+                "quantity": item.quantity,
+            }
+
+        out_dict["customer"] = Order.customer.email
+        out_dict["status"] = Order.status
+        out_dict["Order"] = Orderitem_dict
+
+        return Response(out_dict)
+
+    def update(self, request, pk, *args, **kwarg):
+        Order = Orders.objects.get(pk=pk)
+        Order.status = request.data.get("status")
+        Order.save(update_fields=["status"])
+        return Response({"Message": f'The Order is {request.data.get("status")}'})

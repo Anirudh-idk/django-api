@@ -13,4 +13,5 @@ urlpatterns = [
     path("", views.make_order.as_view()),
     path("lu/", views.loginuser.as_view()),
     path("restaurant/", views.RestaurantSpecificOrders.as_view()),
+    path("restaurant/<int:pk>/", views.updateStatus.as_view()),
 ]

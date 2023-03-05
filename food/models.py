@@ -91,11 +91,11 @@ class Orders(models.Model):
     status = models.CharField(
         max_length=40,
         choices=[
-            ("A", "Accepted"),
-            ("R", "Rejected"),
-            ("F", "Finished"),
-            ("D", "Delivered"),
-            ("W", "Waiting"),
+            ("Aceepted", "Accepted"),
+            ("Rejected", "Rejected"),
+            ("Finished", "Finished"),
+            ("Delivered", "Delivered"),
+            ("Waiting", "Waiting"),
         ],
         default="Waiting",
     )
@@ -105,35 +105,3 @@ class Orderitem(models.Model):
     dish = models.ForeignKey(to=Dishes, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     order = models.ForeignKey(to=Orders, on_delete=models.CASCADE)
-
-
-"""
-class Custommanager(BaseUserManager):
-    def create_user(self,email,password,type_of_user,**extra_fields):
-        if not email:
-            raise ValueError("No email")
-        email = self.normalize_email(email)
-        if type_of_user == 'R':
-            user = self.model(email=email,**extra_fields)
-
-        elif type_of_user == 'C':
-            
-            user = self.model(email=email,**extra_fields)
-        user.set_password(password)
-        user.save()
-        return user
-    
-class Cust_User(AbstractBaseUser):
-    email = models.EmailField(max_length=100,unique=True,blank=False)
-    type_of_user = models.CharField(max_length=1,choices = [('R','Restaurant'),('C','Customer')],default='C')
-    firstname = models.CharField(max_length=50,blank=True,null=True )
-    lastname = models.CharField(max_length=50,blank=True ,null=True)
-    restaurant_name = models.CharField(max_length=50,blank=True,null=True )
-
-    USERNAME_FIELD = 'email'
-
-    objects = Custommanager()
-
-    def __str__(self) -> str:
-        return self.email
-    """
