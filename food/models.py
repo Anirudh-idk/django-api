@@ -34,7 +34,7 @@ class userManager(BaseUserManager):
         return user
 
 
-class user(AbstractBaseUser):
+class User(AbstractBaseUser):
     is_customer = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -51,24 +51,24 @@ class user(AbstractBaseUser):
         return True
 
 
-class customer(models.Model):
-    user = models.OneToOneField(user, on_delete=models.CASCADE)
+class Customer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     firstname = models.CharField(max_length=80)
     lastname = models.CharField(max_length=80)
 
 
-class restaurant(models.Model):
-    user = models.OneToOneField(user, on_delete=models.CASCADE)
+class Restaurant(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     rest_name = models.CharField(max_length=80, unique=True)
 
     def __str__(self) -> str:
         return self.rest_name
 
 
-class Dishes(models.Model):
+class Dish(models.Model):
     name = models.CharField(max_length=30)
     price = models.DecimalField(max_digits=5, decimal_places=2, default=10.00)
-    restaurant = models.ForeignKey(to=restaurant, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(to=Restaurant, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.name
@@ -79,14 +79,14 @@ class Cart(models.Model):
 
 
 class Cartitem(models.Model):
-    dish = models.ForeignKey(to=Dishes, on_delete=models.CASCADE, null=True, blank=True)
+    dish = models.ForeignKey(to=Dish, on_delete=models.CASCADE, null=True, blank=True)
     cart = models.ForeignKey(to=Cart, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.IntegerField()
 
 
 class Orders(models.Model):
-    customer = models.ForeignKey(to=user, on_delete=models.CASCADE)
-    restaurant = models.ForeignKey(to=restaurant, on_delete=models.CASCADE)
+    customer = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(to=Restaurant, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
     status = models.CharField(
         max_length=40,
@@ -95,13 +95,12 @@ class Orders(models.Model):
             ("Rejected", "Rejected"),
             ("Finished", "Finished"),
             ("Delivered", "Delivered"),
-            ("Waiting", "Waiting"),
         ],
         default="Waiting",
     )
 
 
 class Orderitem(models.Model):
-    dish = models.ForeignKey(to=Dishes, on_delete=models.CASCADE)
+    dish = models.ForeignKey(to=Dish, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     order = models.ForeignKey(to=Orders, on_delete=models.CASCADE)

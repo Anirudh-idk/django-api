@@ -2,36 +2,36 @@ from rest_framework import serializers
 from . import models
 
 
-class userserializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.user
+        model = models.User
         fields = ["id", "email", "password"]
         extra_kwargs = {"password": {"write_only": True}}
 
 
-class cust_serializer(serializers.ModelSerializer):
-    user = userserializer()
+class CustomerSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
 
     class Meta:
-        model = models.customer
+        model = models.Customer
         fields = ["id", "user", "firstname", "lastname"]
 
     def create(
         self, validated_data
-    ):  # first create user then use that to create user profile
+    ):  # first create user then use that to create custom user profile
         user_data = validated_data.pop("user")
-        user1 = models.user.objects.create_user(**user_data)
+        user1 = models.User.objects.create_user(**user_data)
         user1.is_customer = True
         user1.save()
-        instance = models.customer.objects.create(user=user1, **validated_data)
+        instance = models.Customer.objects.create(user=user1, **validated_data)
         return instance
 
 
-class rest_serializer(serializers.ModelSerializer):
-    user = userserializer()
+class RestaurantSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
 
     class Meta:
-        model = models.restaurant
+        model = models.Restaurant
         fields = [
             "id",
             "user",
@@ -40,29 +40,29 @@ class rest_serializer(serializers.ModelSerializer):
 
     def create(
         self, validated_data
-    ):  # first create user then use that to create user profile
+    ):  # first create user then use that to create custom user profile
         user_data = validated_data.pop("user")
-        user1 = models.user.objects.create_user(**user_data)
+        user1 = models.User.objects.create_user(**user_data)
         user1.is_restaurant = True
         user1.save()
-        instance = models.restaurant.objects.create(user=user1, **validated_data)
+        instance = models.Restaurant.objects.create(user=user1, **validated_data)
         return instance
 
 
-class Dish_serializer(serializers.ModelSerializer):
-    # restaurant = rest_serializer()
+class DishSerializer(serializers.ModelSerializer):
+    # restauraRestaurantS()
     class Meta:
-        model = models.Dishes
+        model = models.Dish
         fields = ["id", "name", "price", "restaurant"]
 
 
-class Cart_serializer(serializers.ModelSerializer):
+class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Cart
         fields = ["id", "email"]
 
 
-class Cartitem_serializer(serializers.ModelSerializer):
+class CartitemSerializer(serializers.ModelSerializer):
     dish = serializers.ReadOnlyField(read_only=True)
     cart = serializers.ReadOnlyField(read_only=True)
 
@@ -82,7 +82,7 @@ class Cartitem_serializer(serializers.ModelSerializer):
         return instance
 
 
-class Orderitem_serializer(serializers.ModelSerializer):
+class OrderitemSerializer(serializers.ModelSerializer):
     dish = serializers.ReadOnlyField(read_only=True)
     quantity = serializers.ReadOnlyField(read_only=True)
     order = serializers.ReadOnlyField(read_only=True)
@@ -106,7 +106,7 @@ class Orderitem_serializer(serializers.ModelSerializer):
         return instance
 
 
-class Order_serializer(serializers.ModelSerializer):
+class OrderSerializer(serializers.ModelSerializer):
     customer = serializers.ReadOnlyField(read_only=True)
     restaurant = serializers.ReadOnlyField(read_only=True)
 

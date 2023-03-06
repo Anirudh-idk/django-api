@@ -3,17 +3,30 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("products/", views.DishListCreateview.as_view()),
-    path("products/<int:pk>/update/", views.DishUpdateDelete.as_view()),
-    path("products/<int:pk>/delete/", views.DishUpdateDelete.as_view()),
-    path("products/<int:pk>/", views.cartitemcreate.as_view()),
-    path("products/<int:pk>/", views.dishretrieve.as_view()),
-    path("register/customer/", views.createcustomer.as_view()),
-    path("register/restaurant/", views.createrestaurant.as_view()),
-    path("", views.make_order.as_view()),
-    path("lu/", views.loginuser.as_view()),
-    path("restaurant/", views.RestaurantSpecificOrders.as_view()),
-    path("restaurant/<int:pk>/", views.updateStatus.as_view()),
-    path("test/", views.RestaurantListView.as_view()),
-    path("test/<str:rest_name>/", views.Dish_RestaurantSpecificlistView.as_view()),
+    # User authentication and registration urls
+    path("", views.LoginUserView.as_view()),
+    path("register/customer/", views.CreateCustomerView.as_view()),
+    path("register/restaurant/", views.CreateRestaurantView.as_view()),
+    # customer related urls
+    path("restaurants/", views.RestaurantListView.as_view()),
+    path(
+        "restaurants/<str:rest_name>/",
+        views.Dish_RestaurantSpecificListView.as_view(),
+    ),
+    path(
+        "restaurants/<str:rest_name>/<int:pk>/",
+        views.DishRetrieve_CartitemCreateView.as_view(),
+    ),
+    path(
+        "restaurants/<str:rest_name>/<int:pk>/update/",
+        views.DishUpdateDeleteView.as_view(),
+    ),
+    path(
+        "restaurants/<str:rest_name>/<int:pk>/delete/",
+        views.DishUpdateDeleteView.as_view(),
+    ),
+    path("placeorder/", views.PlaceOrderView.as_view()),
+    # restaurant related urls
+    path("orders/", views.RestaurantSpecificOrdersView.as_view()),
+    path("orders/<int:pk>/", views.UpdateStatusView.as_view()),
 ]
