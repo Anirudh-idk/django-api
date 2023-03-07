@@ -112,7 +112,7 @@ class Dish_RestaurantSpecificListView(generics.ListAPIView):
     lookup_field = "rest_name"
 
     def get(self, request, rest_name, *args, **kwargs):
-        restaurant = restaurant.objects.get(rest_name=rest_name)
+        restaurant = models.Restaurant.objects.get(rest_name=rest_name)
         if restaurant:
             qs = models.Dish.objects.filter(restaurant=restaurant.pk)
             if qs:
