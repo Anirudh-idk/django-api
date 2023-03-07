@@ -1,6 +1,3 @@
--- fix urls and naming schemes
--- add the restauarnt list page
--- remove dish update and delete
 -- work task 3 (accepted then Finished/Delivered)
 
 
