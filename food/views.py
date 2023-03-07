@@ -1,4 +1,5 @@
 from . import models, serializers
+from proj1 import settings
 from django.shortcuts import redirect
 from django.core.mail import send_mail
 from rest_framework.views import APIView
@@ -317,7 +318,13 @@ class UpdateStatusView(generics.RetrieveUpdateAPIView):
             print(request.data)
             order.status = request.data.get("status")
             order.save(update_fields=["status"])
-            send_mail("test", "test", "anisin300gmail.com", ["anisin300@gmail.com"])
+            send_mail(
+                "Order status updated",
+                f"Your Order is {order.status}",
+                settings.EMAIL_HOST_USER,
+                [f"{order.customer.email}"],
+                fail_silently=False,
+            )
             return Response(
                 {
                     "m+essage": f'Order status is  updated to {request.data.get("status")}'
