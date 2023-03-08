@@ -14,6 +14,10 @@ urlpatterns = [
         views.Dish_RestaurantSpecificListView.as_view(),
     ),
     path(
+        "create_dish/",
+        views.DishCreateView.as_view(),
+    ),
+    path(
         "restaurants/<str:rest_name>/<int:pk>/",
         views.DishRetrieve_CartitemCreateView.as_view(),
     ),

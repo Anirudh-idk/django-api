@@ -104,6 +104,11 @@ class RestaurantListView(generics.ListAPIView):
             )
 
 
+class DishCreateView(generics.CreateAPIView):
+    queryset = models.Dish.objects.all()
+    serializer_class = serializers.DishSerializer
+
+
 class Dish_RestaurantSpecificListView(generics.ListAPIView):
     queryset = models.Dish.objects.all()
     serializer_class = serializers.DishSerializer
@@ -112,7 +117,10 @@ class Dish_RestaurantSpecificListView(generics.ListAPIView):
     lookup_field = "rest_name"
 
     def get(self, request, rest_name, *args, **kwargs):
-        restaurant = models.Restaurant.objects.get(rest_name=rest_name)
+        try:
+            restaurant = models.Restaurant.objects.get(rest_name=rest_name)
+        except:
+            restaurant = None
         if restaurant:
             qs = models.Dish.objects.filter(restaurant=restaurant.pk)
             if qs:
@@ -156,9 +164,16 @@ class DishRetrieve_CartitemCreateView(generics.ListCreateAPIView):
     serializer_class = serializers.CartitemSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, pk, *args, **kwargs):
-        queryset = models.Dish.objects.get(pk=pk)
-        return Response(serializers.DishSerializer(queryset).data)
+    def get(self, request, pk, rest_name, *args, **kwargs):
+        try:
+            queryset = models.Dish.objects.get(
+                pk=pk, restaurant=models.Restaurant.objects.get(rest_name=rest_name).pk
+            )
+            return Response(serializers.DishSerializer(queryset).data)
+        except Exception as err:
+            return Response(
+                {str(type(err)): str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def post(self, request, pk, *args, **kwargs):
         try:
@@ -315,7 +330,6 @@ class UpdateStatusView(generics.RetrieveUpdateAPIView):
     def update(self, request, pk, *args, **kwarg):
         try:
             order = models.Orders.objects.get(pk=pk)
-            print(request.data)
             order.status = request.data.get("status")
             order.save(update_fields=["status"])
             send_mail(

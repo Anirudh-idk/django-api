@@ -24,6 +24,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         user1.is_customer = True
         user1.save()
         instance = models.Customer.objects.create(user=user1, **validated_data)
+
         return instance
 
 
@@ -50,7 +51,6 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
 
 class DishSerializer(serializers.ModelSerializer):
-    # restauraRestaurantS()
     class Meta:
         model = models.Dish
         fields = ["id", "name", "price", "restaurant"]
