@@ -273,30 +273,35 @@ class RestaurantSpecificOrdersView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         out_dict1 = {}
         out_dict2 = {}
-        restname = models.Restaurant.objects.get(user=request.user)
-        qs = models.Orders.objects.filter(restaurant=restname)
-        if qs:
-            for order in qs:
-                qs_orderitems = models.Orderitem.objects.filter(order=order)
+        try:
+            restname = models.Restaurant.objects.get(user=request.user)
+            qs = models.Orders.objects.filter(restaurant=restname)
+            if qs:
+                for order in qs:
+                    qs_orderitems = models.Orderitem.objects.filter(order=order)
 
-                orderitem_dict = {}
+                    orderitem_dict = {}
 
-                for i in range(len(list(qs_orderitems))):
-                    item = list(qs_orderitems)[i]
-                    orderitem_dict[f"Item{i+1}"] = {
-                        "dish": item.dish.name,
-                        "quantity": item.quantity,
-                    }
+                    for i in range(len(list(qs_orderitems))):
+                        item = list(qs_orderitems)[i]
+                        orderitem_dict[f"Item{i+1}"] = {
+                            "dish": item.dish.name,
+                            "quantity": item.quantity,
+                        }
 
-                out_dict2["Order_id"] = order.pk
-                out_dict2["customer"] = order.customer.email
-                out_dict2["status"] = order.status
-                out_dict2["Order"] = orderitem_dict
+                    out_dict2["Order_id"] = order.pk
+                    out_dict2["customer"] = order.customer.email
+                    out_dict2["status"] = order.status
+                    out_dict2["Order"] = orderitem_dict
 
-                out_dict1[order.pk] = out_dict2
-            return Response(out_dict1)
-        else:
-            return Response({"message": "No orders"})
+                    out_dict1[order.pk] = out_dict2
+                return Response(out_dict1)
+            else:
+                return Response({"message": "No orders"})
+        except Exception as err:
+            return Response(
+                {str(type(err)): str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class UpdateStatusView(generics.RetrieveUpdateAPIView):
