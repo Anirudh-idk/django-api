@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 # Authentication Models
 
 
-class userManager(BaseUserManager):
+class userManager(BaseUserManager):  # custom manager to treat email as username_field
     def create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError("The email must be set")
@@ -34,7 +34,7 @@ class userManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser):  # custom user to add roles as boolean
     is_customer = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -65,6 +65,7 @@ class Restaurant(models.Model):
         return self.rest_name
 
 
+# Main Models
 class Dish(models.Model):
     name = models.CharField(max_length=30)
     price = models.DecimalField(max_digits=5, decimal_places=2, default=10.00)
@@ -76,12 +77,6 @@ class Dish(models.Model):
 
 class Cart(models.Model):
     email = models.EmailField(max_length=100, unique=True)
-
-
-class Cartitem(models.Model):
-    dish = models.ForeignKey(to=Dish, on_delete=models.CASCADE, null=True, blank=True)
-    cart = models.ForeignKey(to=Cart, on_delete=models.CASCADE, null=True, blank=True)
-    quantity = models.IntegerField()
 
 
 class Orders(models.Model):
@@ -98,6 +93,13 @@ class Orders(models.Model):
         ],
         default="Waiting",
     )
+
+
+# Connnection models
+class Cartitem(models.Model):
+    dish = models.ForeignKey(to=Dish, on_delete=models.CASCADE, null=True, blank=True)
+    cart = models.ForeignKey(to=Cart, on_delete=models.CASCADE, null=True, blank=True)
+    quantity = models.IntegerField()
 
 
 class Orderitem(models.Model):
