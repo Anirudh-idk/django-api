@@ -108,6 +108,7 @@ class RestaurantListView(generics.ListAPIView):
 class DishCreateView(generics.CreateAPIView):
     queryset = models.Dish.objects.all()
     serializer_class = serializers.DishSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class Dish_RestaurantSpecificListView(generics.ListAPIView):
@@ -138,9 +139,11 @@ class DishUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.DishSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def update(self, request, pk, *args, **kwargs):
+    def update(self, request, pk, rest_name, *args, **kwargs):
         try:
-            qs = models.Dish.objects.get(pk=pk)
+            qs = models.Dish.objects.get(
+                pk=pk, restaurant=models.Restaurant.objects.get(rest_name=rest_name).pk
+            )
             serializer = serializers.DishSerializer(qs, data=request.data)
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
@@ -150,14 +153,22 @@ class DishUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
                 {str(type(err)): str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def delete(self, request, pk, *args, **kwargs):
-
-        qs = models.Dish.objects.get(pk=pk)
-        if qs:
-            qs.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response({"message": "Dish with the given Dish_id doesn't exist"})
+    def delete(self, request, pk, rest_name, *args, **kwargs):
+        try:
+            qs = models.Dish.objects.get(
+                pk=pk, restaurant=models.Restaurant.objects.get(rest_name=rest_name).pk
+            )
+            if qs:
+                qs.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(
+                    {"message": "Dish with the given Dish_id doesn't exist"}
+                )
+        except Exception as err:
+            return Response(
+                {str(type(err)): str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class DishRetrieve_CartitemCreateView(generics.ListCreateAPIView):
